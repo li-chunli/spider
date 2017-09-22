@@ -1,4 +1,5 @@
 #!/bin/bash
+#依赖的工具: wget, curl, grep, sed, awk
 
 Usage()
 {
@@ -6,7 +7,7 @@ Usage()
     echo -e "$0 http://www.maiziedu.com/course/9/       \033[31;35m某课程列表页面\033[0m"
     echo -e "$0 http://www.maiziedu.com/course/9-52/    \033[31;35m某课程播放页面\033[0m"
     echo -e "$0 http://www.maiziedu.com/course/android/ \033[31;35m某职业学习路线\033[0m"
-    echo -e "$0 http://www.maiziedu.com/                \033[31;35m下载所有职业学习路线视频\033[0m"
+    echo -e "$0 http://www.maiziedu.com/                \033[31;35m下载全站视频，并分类保存\033[0m"
 }
 
 Download()
@@ -45,7 +46,7 @@ Download()
 
         realsource=`curl $url  2>&1 | grep lessonUrl 2>&1 | awk -F \" '{print $2}'`
         echo -e "\033[32;38m正在从[$realsource]下载[$filename],保存到[$CourseName]目录.\033[0m"
-        #wget -c $realsource -O $CourseName/$filename
+        wget -c $realsource -O $CourseName/$filename
     done
     rm -rf $WgetFile
     rm -rf $DutyList
@@ -95,8 +96,10 @@ then
     exit
 fi
 
+rm -rf /tmp/tmp*
 CourseURL=$1
 pwd=$PWD
+
 
 echo $CourseURL | awk -F \/ '{print $5}' | grep -P '^\d+$' >/dev/null 2>&1 #纯数字
 if [ 0 -eq $? ]
@@ -109,7 +112,6 @@ fi
 echo $CourseURL | awk -F \/ '{print $5}' | grep -P '^\d' >/dev/null 2>&1 #数字开头
 if [  0 -eq $? ]
 then
-    echo "model:2"
     echo -e "\033[45;39m进入模式2，下载某课程列表所有视频\033[0m"
     Download `echo $CourseURL|  awk -F \- '{print $1"/"}'`
     exit
@@ -123,7 +125,6 @@ then
     exit
 fi
 
-echo -e "\033[45;39m进入模式4，下载全站课程视频\033[0m"
+echo -e "\033[45;39m进入模式4，下载全站课程视频\033[0m" #下载全站
 DownloadMajorAll $CourseURL
-
 
