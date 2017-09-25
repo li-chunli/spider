@@ -18,7 +18,7 @@ Download()
     ClassID=`echo $CourseURL | awk -F \/ '{print $5}'`
     WgetFile=/tmp/tmp_`date +'%N'`
     DutyList=/tmp/tmp_`date +'%N'`
-    wget $CourseURL -O $WgetFile 2>&1 | >/dev/null
+    wget -q $CourseURL -O $WgetFile 
     CourseName=`cat $WgetFile  | grep '<h1 class=' | awk -F \> '{print $2}'| awk -F \< '{print $1}' | sed 's/[ ][ ]*//g'|sed 's/\t//g' `
     if [ ! -z $MajorSeq ]
     then
@@ -27,8 +27,6 @@ Download()
     else
         echo -e "\033[42;44m正在下载[$CourseName]->[$CourseURL]\033[0m"
     fi
-
-
     cat $WgetFile|grep "<li><a href=\"/course/$ClassID"|awk -F \" '{print $2"@"$9}'|sed -r s/\(\>\|\<.*\)//g|sed s/$/.mp4/g|sed 's/[ ][ ]*//g'|sed 's/\t//g' >$DutyList
     mkdir $CourseName 2>&1 | > /dev/null
     FileSeq=0;
@@ -46,7 +44,7 @@ Download()
 
         realsource=`curl $url  2>&1 | grep lessonUrl 2>&1 | awk -F \" '{print $2}'`
         echo -e "\033[32;38m正在从[$realsource]下载[$filename],保存到[$CourseName]目录.\033[0m"
-        wget -c $realsource -O $CourseName/$filename
+        wget -c -T 10 $realsource -O $CourseName/$filename
     done
     rm -rf $WgetFile
     rm -rf $DutyList
@@ -59,7 +57,7 @@ DownloadMajor()
     mkdir $MajorName > /dev/null 2>&1
     cd $MajorName
     WgetFileMajor=/tmp/tmp_`date +'%N'`
-    wget $CourseURL -O $WgetFileMajor  2>&1 | >/dev/null
+    wget -q $CourseURL -O $WgetFileMajor
     DownloadMajorSeq=1
     for line in `cat $WgetFileMajor | grep '<a href="/course/'| grep -v '</a>'| awk -F \" '{print "http://www.maiziedu.com"$2}'`
     do
@@ -73,7 +71,7 @@ DownloadMajorAll()
 {
     CourseURL=$1
     DownloadMajorAllFile=/tmp/tmp_`date +'%N'`
-    wget $CourseURL -O $DownloadMajorAllFile  2>&1 | >/dev/null
+    wget -q $CourseURL -O $DownloadMajorAllFile 
     for line in `cat $DownloadMajorAllFile | grep '<h1 class="font12 tea-tit">' -B 5 | grep '<a href="/course/' |awk -F \" '{print "http://www.maiziedu.com"$2}'`
     do
         cd $pwd
