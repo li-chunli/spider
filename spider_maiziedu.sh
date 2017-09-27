@@ -1,5 +1,5 @@
 #!/bin/bash
-#依赖的工具: wget, curl, grep, sed, awk
+#依赖的工具: wget, grep, sed, awk
 
 Usage()
 {
@@ -18,7 +18,7 @@ Download()
     ClassID=`echo $CourseURL | awk -F \/ '{print $5}'`
     WgetFile=/tmp/tmp_`date +'%N'`
     DutyList=/tmp/tmp_`date +'%N'`
-    wget -q $CourseURL -O $WgetFile 
+    wget $CourseURL -O $WgetFile  --user-agent='Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Maxthon/4.9.5.1000 Chrome/39.0.2146.0 Safari/537.36'
     CourseName=`cat $WgetFile  | grep '<h1 class=' | awk -F \> '{print $2}'| awk -F \< '{print $1}' | sed 's/[ ][ ]*//g'|sed 's/\t//g' `
     if [ ! -z $MajorSeq ]
     then
@@ -42,9 +42,11 @@ Download()
             filename=`echo $line | awk -F @ '{print $2}' `
         fi
 
-        realsource=`curl $url  2>&1 | grep lessonUrl 2>&1 | awk -F \" '{print $2}'`
+        LoopTmpFile=/tmp/tmp_`date +'%N'`
+        wget $url -O $LoopTmpFile  --user-agent='Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Maxthon/4.9.5.1000 Chrome/39.0.2146.0 Safari/537.36'
+        realsource=`cat $LoopTmpFile | grep lessonUrl 2>&1 | awk -F \" '{print $2}'`
         echo -e "\033[32;38m正在从[$realsource]下载[$filename],保存到[$CourseName]目录.\033[0m"
-        wget -c -T 10 $realsource -O $CourseName/$filename
+        wget -c -T 10 $realsource -O $CourseName/$filename --user-agent='Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Maxthon/4.9.5.1000 Chrome/39.0.2146.0 Safari/537.36'
     done
     rm -rf $WgetFile
     rm -rf $DutyList
@@ -53,11 +55,12 @@ Download()
 DownloadMajor()
 {
     CourseURL=$1
-    MajorName=`curl $CourseURL 2>&1 | grep -A 4 '<li><a href="/course/">'| grep active|awk -F \> '{print $2}'|awk -F \< '{print $1}'|sed 's/[ ][ ]*/_/g'|sed 's/\t//g'`
+    WgetFileMajor=/tmp/tmp_`date +'%N'`
+    wget  $CourseURL -O $WgetFileMajor --user-agent='Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Maxthon/4.9.5.1000 Chrome/39.0.2146.0 Safari/537.36'
+    MajorName=`cat $WgetFileMajor | grep -A 4 '<li><a href="/course/">'| grep active|awk -F \> '{print $2}'|awk -F \< '{print $1}'|sed 's/[ ][ ]*/_/g'|sed 's/\t//g'`
     mkdir $MajorName > /dev/null 2>&1
     cd $MajorName
-    WgetFileMajor=/tmp/tmp_`date +'%N'`
-    wget -q $CourseURL -O $WgetFileMajor
+    wget  $CourseURL -O $WgetFileMajor --user-agent='Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Maxthon/4.9.5.1000 Chrome/39.0.2146.0 Safari/537.36'
     DownloadMajorSeq=1
     for line in `cat $WgetFileMajor | grep '<a href="/course/'| grep -v '</a>'| awk -F \" '{print "http://www.maiziedu.com"$2}'`
     do
@@ -71,7 +74,7 @@ DownloadMajorAll()
 {
     CourseURL=$1
     DownloadMajorAllFile=/tmp/tmp_`date +'%N'`
-    wget -q $CourseURL -O $DownloadMajorAllFile 
+    wget  $CourseURL -O $DownloadMajorAllFile --user-agent='Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Maxthon/4.9.5.1000 Chrome/39.0.2146.0 Safari/537.36'
     for line in `cat $DownloadMajorAllFile | grep '<h1 class="font12 tea-tit">' -B 5 | grep '<a href="/course/' |awk -F \" '{print "http://www.maiziedu.com"$2}'`
     do
         cd $pwd
