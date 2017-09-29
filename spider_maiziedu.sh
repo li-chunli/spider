@@ -19,7 +19,7 @@ Download()
     WgetFile=/tmp/tmp_`date +'%N'`
     DutyList=/tmp/tmp_`date +'%N'`
     wget $CourseURL -O $WgetFile  --user-agent='Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Maxthon/4.9.5.1000 Chrome/39.0.2146.0 Safari/537.36'
-    CourseName=`cat $WgetFile  | grep '<h1 class=' | awk -F \> '{print $2}'| awk -F \< '{print $1}' | sed 's/[ ][ ]*//g'|sed 's/\t//g' `
+    CourseName=`cat $WgetFile  | grep '<h1 class=' | awk -F \> '{print $2}'| awk -F \< '{print $1}' | sed 's/[ ][ ]*//g'|sed 's/\t//g'|sed 's/\&.*\;/_/g' `
     if [ ! -z $MajorSeq ]
     then
         CourseName=$MajorSeq-$CourseName
@@ -27,7 +27,7 @@ Download()
     else
         echo -e "\033[42;44m正在下载[$CourseName]->[$CourseURL]\033[0m"
     fi
-    cat $WgetFile|grep "<li><a href=\"/course/$ClassID"|awk -F \" '{print $2"@"$9}'|sed -r s/\(\>\|\<.*\)//g|sed s/$/.mp4/g|sed 's/[ ][ ]*//g'|sed 's/\t//g' >$DutyList
+    cat $WgetFile|grep "<li><a href=\"/course/$ClassID"|awk -F \" '{print $2"@"$9}'|sed -r s/\(\>\|\<.*\)//g|sed s/$/.mp4/g|sed 's/[ ][ ]*//g'|sed 's/\t//g'|sed 's/\&.*\;/_/g' >$DutyList
     mkdir $CourseName 2>&1 | > /dev/null
     FileSeq=0;
     for line in `cat $DutyList`
